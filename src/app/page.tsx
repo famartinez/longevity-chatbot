@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image'; // Optimized Next.js image handler
 
-// Define a simple TypeScript interface for our messages
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -10,23 +10,20 @@ interface Message {
 }
 
 export default function Chat() {
-  // 1. Manually control the message history and input states
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. Custom submit handler to send the message to /api/chat
   const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     setError(null);
     const userMessageContent = input;
-    setInput(''); // Clear input box immediately
+    setInput('');
     setIsLoading(true);
 
-    // Create and append the user's message locally
     const userMessage: Message = {
       id: Math.random().toString(),
       role: 'user',
@@ -37,7 +34,6 @@ export default function Chat() {
     setMessages(updatedMessages);
 
     try {
-      // Hit your Next.js API endpoint directly
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,7 +44,6 @@ export default function Chat() {
         throw new Error(`Server returned status ${response.status}`);
       }
 
-      // Read the streamed response text
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       
@@ -56,7 +51,6 @@ export default function Chat() {
         throw new Error('No readable response stream found.');
       }
 
-      // Add a blank placeholder assistant message that we will fill up stream by stream
       const assistantMessageId = Math.random().toString();
       setMessages((prev) => [
         ...prev,
@@ -69,15 +63,10 @@ export default function Chat() {
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Decode the binary stream chunk into text
         const chunk = decoder.decode(value, { stream: true });
-        
-        // Vercel AI SDK data streams embed parts (like 0:"text"). Clean it up roughly:
         const cleanChunk = chunk.replace(/^\d+:"/g, '').replace(/"$/g, '').replace(/\\n/g, '\n');
-
         fullAssistantContent += cleanChunk;
 
-        // Progressively update the assistant message bubble
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMessageId ? { ...m, content: fullAssistantContent } : m
@@ -85,7 +74,7 @@ export default function Chat() {
         );
       }
     } catch (err: any) {
-      setError(err.message || 'Something went wrong while fetching the AI.');
+      setError(err.message || 'Something went wrong.');
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +84,8 @@ export default function Chat() {
     <div className="flex flex-col w-full max-w-2xl mx-auto h-screen bg-slate-50 dark:bg-zinc-900">
       {/* Header */}
       <header className="p-4 bg-white dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700 text-center">
-<h1 className="text-xl font-bold text-amber-600 dark:text-amber-400">Wally AI</h1>        <p className="text-xs text-slate-500 dark:text-slate-400">Fitness, Supplement & Longevity Advisor</p>
+        <h1 className="text-xl font-bold text-amber-600 dark:text-amber-400">Wally AI</h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Fitness, Supplement & Longevity Advisor</p>
       </header>
 
       {/* Error Banner */}
@@ -106,10 +96,26 @@ export default function Chat() {
       )}
 
       {/* Chat History Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.length === 0 && (
-          <div className="text-center text-slate-400 my-12">
-            Ask me anything about VO2 max protocols, hypertrophy splits, or supplement efficacy!
+          <div className="flex flex-col items-center justify-center my-6 space-y-6 animate-fade-in">
+            
+            {/* Custom Mascot Showcase Card */}
+            <div className="w-full max-w-sm overflow-hidden rounded-xl border border-slate-200 dark:border-zinc-700 shadow-md bg-white dark:bg-zinc-800 p-2">
+              <div className="relative w-full aspect-[1/2.2] rounded-lg overflow-hidden">
+                <Image 
+                  src="/wally-stats.png" 
+                  alt="Wally Longevity Tracker Metrics"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+
+            <div className="text-center text-sm max-w-md text-slate-500 dark:text-slate-400">
+              🐾 Hi! I am <span className="font-semibold text-amber-600 dark:text-amber-400">Wally</span>. Ask me anything about VO2 max protocols, hypertrophy splits, or supplement efficacy!
+            </div>
           </div>
         )}
         
@@ -117,7 +123,7 @@ export default function Chat() {
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] rounded-lg px-4 py-2 shadow-sm ${
               m.role === 'user' 
-                ? 'bg-emerald-600 text-white' 
+                ? 'bg-amber-600 text-white' 
                 : 'bg-white dark:bg-zinc-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-zinc-700'
             }`}>
               <span className="block font-semibold text-xs mb-1 opacity-75">
@@ -128,24 +134,24 @@ export default function Chat() {
           </div>
         ))}
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
-          <div className="text-slate-400 text-xs italic">Wally is thinking...</div>
+          <div className="text-slate-400 text-xs italic pl-1">Wally is looking up clinical data...</div>
         )}
       </div>
 
       {/* Input Form */}
       <form onSubmit={handleCustomSubmit} className="p-4 bg-white dark:bg-zinc-800 border-t border-slate-200 dark:border-zinc-700 flex gap-2">
         <input
-          className="flex-1 p-2 border border-slate-300 dark:border-zinc-600 rounded-md bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white"
+          className="flex-1 p-2 border border-slate-300 dark:border-zinc-600 rounded-md bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-white"
           value={input}
           placeholder="e.g., What is the best supplement stack for cellular health?"
-          onChange={(e) => setInput(e.target.value)} // Direct Native State Handler
+          onChange={(e) => setInput(e.target.value)}
         />
         <button 
           type="submit" 
           disabled={!input.trim() || isLoading} 
-          className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap"
         >
-          Send
+          Ask Wally
         </button>
       </form>
     </div>
