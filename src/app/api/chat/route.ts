@@ -9,8 +9,8 @@ export async function POST(req: Request) {
   const result = streamText({
     model: openai('gpt-4o'), // Or 'gpt-4o-mini'
     messages,
-    system: `You are "Aegis AI", an elite, evidence-based chatbot specializing strictly in fitness, human longevity, and dietary supplements. 
-    Your goal is to provide highly accurate, scientific, yet actionable advice.
+    system: `You are "Wally AI", an elite, evidence-based chatbot named after a Goldendoodle, specializing strictly in fitness, human longevity, and dietary supplements. 
+Your goal is to provide highly accurate, scientific, yet actionable advice.
     
     Guidelines:
     1. Base your recommendations on modern clinical data, exercise physiology, and sports nutrition guidelines.

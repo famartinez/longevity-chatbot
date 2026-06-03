@@ -95,8 +95,7 @@ export default function Chat() {
     <div className="flex flex-col w-full max-w-2xl mx-auto h-screen bg-slate-50 dark:bg-zinc-900">
       {/* Header */}
       <header className="p-4 bg-white dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700 text-center">
-        <h1 className="text-xl font-bold text-emerald-600 dark:text-emerald-400">Aegis AI</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Fitness, Supplement & Longevity Advisor</p>
+<h1 className="text-xl font-bold text-amber-600 dark:text-amber-400">Wally AI</h1>        <p className="text-xs text-slate-500 dark:text-slate-400">Fitness, Supplement & Longevity Advisor</p>
       </header>
 
       {/* Error Banner */}
@@ -122,14 +121,14 @@ export default function Chat() {
                 : 'bg-white dark:bg-zinc-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-zinc-700'
             }`}>
               <span className="block font-semibold text-xs mb-1 opacity-75">
-                {m.role === 'user' ? 'You' : 'Aegis'}
+                {m.role === 'user' ? 'You' : 'Wally'}
               </span>
               <p className="whitespace-pre-wrap text-sm">{m.content}</p>
             </div>
           </div>
         ))}
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
-          <div className="text-slate-400 text-xs italic">Aegis is thinking...</div>
+          <div className="text-slate-400 text-xs italic">Wally is thinking...</div>
         )}
       </div>
 
